@@ -1,65 +1,42 @@
-import React from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { View, Text, Pressable } from "react-native";
+import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-// 1. Define the screens in your navigator
-// 'undefined' means the route doesn't have parameters
-export type RootStackParamList = {
-  Landing: undefined;
-  SignIn: undefined;
-  SignUp: undefined;
-};
+export default function Landing() {
+  const router = useRouter();
 
-// 2. Define the props for this specific screen
-type Props = NativeStackScreenProps<RootStackParamList, "Landing">;
-
-export default function Landing({ navigation }: Props) {
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>HomeBridge</Text>
-        <Text style={styles.subtitle}>Connect your home, anywhere.</Text>
-      </View>
+    <SafeAreaView className="flex-1 bg-neutral-100">
+      <View className="flex-1 items-center justify-around p-5">
+        <View className="items-center">
+          <Text className="text-3xl font-bold text-neutral-800">HomeBridge</Text>
+          <Text className="mt-2 text-base text-neutral-500">
+            Connect your home, anywhere.
+          </Text>
+        </View>
 
-      <View style={styles.buttonContainer}>
-        <Button 
-          title="Login" 
-          onPress={() => navigation.navigate("SignIn")} 
-        />
-        <View style={{ height: 15 }} /> 
-        <Button 
-          title="Create Account" 
-          color="#4CAF50"
-          onPress={() => navigation.navigate("SignUp")} 
-        />
+        <View className="w-full px-5">
+          <Pressable
+            className="rounded-lg bg-blue-500 py-3 active:opacity-80"
+            onPress={() => router.push("/signin")}
+          >
+            <Text className="text-center text-base font-semibold text-white">
+              Login
+            </Text>
+          </Pressable>
+
+          <View className="h-4" />
+
+          <Pressable
+            className="rounded-lg bg-green-600 py-3 active:opacity-80"
+            onPress={() => router.push("/signup")}
+          >
+            <Text className="text-center text-base font-semibold text-white">
+              Create Account
+            </Text>
+          </Pressable>
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-    alignItems: "center",
-    justifyContent: "space-around",
-    padding: 20,
-  },
-  header: {
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#666",
-    marginTop: 10,
-  },
-  buttonContainer: {
-    width: "100%",
-    paddingHorizontal: 20,
-  },
-});

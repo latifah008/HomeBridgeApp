@@ -1,26 +1,19 @@
-import React, { useState } from "react";
-import { View, TextInput, Button, Alert, StyleSheet } from "react-native";
-import api from "../src/api/client";
+import { useState } from "react";
+import { View, Text, TextInput, Pressable, Alert } from "react-native";
+import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-
-// Define your navigation types (adjust based on your actual Stack names)
-type RootStackParamList = {
-  SignIn: undefined;
-  SignUp: undefined;
-  Home: undefined;
-};
-
-type Props = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
+import api from "../src/api/client";
 
 interface LoginResponse {
   access: string;
   refresh: string;
 }
 
-export default function SignIn({ navigation }: Props) {
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+export default function SignIn() {
+  const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -38,7 +31,7 @@ export default function SignIn({ navigation }: Props) {
       await SecureStore.setItemAsync("refresh", res.data.refresh);
 
       Alert.alert("Success", "Logged in!");
-      // navigation.replace("Home"); 
+      // router.replace("/home");
     } catch (err: any) {
       const errorMsg = err.response?.data?.detail || "Login failed";
       Alert.alert("Error", errorMsg);
@@ -46,43 +39,42 @@ export default function SignIn({ navigation }: Props) {
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Username or Email"
-        value={username}
-        onChangeText={setUsername}
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        secureTextEntry
-        onChangeText={setPassword}
-      />
-      <Button title="Sign In" onPress={handleLogin} color="#2196F3" />
-      <View style={styles.footer}>
-        <Button 
-          title="Go to Sign Up" 
-          onPress={() => navigation.navigate("SignUp")} 
-          color="#666" 
+    <SafeAreaView className="flex-1 bg-neutral-100">
+      <View className="flex-1 justify-center px-5">
+        <Text className="mb-6 text-2xl font-bold text-neutral-800">
+          Sign in
+        </Text>
+
+        <TextInput
+          className="mb-4 h-12 rounded-lg border border-neutral-300 bg-white px-3"
+          placeholder="Username or Email"
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
         />
+        <TextInput
+          className="mb-4 h-12 rounded-lg border border-neutral-300 bg-white px-3"
+          placeholder="Password"
+          value={password}
+          secureTextEntry
+          onChangeText={setPassword}
+        />
+
+        <Pressable
+          className="rounded-lg bg-blue-500 py-3 active:opacity-80"
+          onPress={handleLogin}
+        >
+          <Text className="text-center text-base font-semibold text-white">
+            Sign In
+          </Text>
+        </Pressable>
+
+        <Pressable className="mt-5" onPress={() => router.push("/signup")}>
+          <Text className="text-center text-neutral-500">
+            Don&apos;t have an account? Sign up
+          </Text>
+        </Pressable>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, justifyContent: "center" },
-  input: {
-    height: 45,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    marginBottom: 15,
-    paddingHorizontal: 10,
-    backgroundColor: "#fff",
-  },
-  footer: { marginTop: 20 }
-});

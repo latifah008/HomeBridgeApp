@@ -1,14 +1,15 @@
-import React, { useState } from "react";
-import { View, TextInput, Button, Alert, StyleSheet, ScrollView } from "react-native";
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Alert,
+  ScrollView,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import api from "../src/api/client";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-
-type RootStackParamList = {
-  SignIn: undefined;
-  SignUp: undefined;
-};
-
-type Props = NativeStackScreenProps<RootStackParamList, 'SignUp'>;
 
 interface RegisterRequest {
   username: string;
@@ -20,7 +21,8 @@ interface RegisterRequest {
   languages: string[];
 }
 
-export default function SignUp({ navigation }: Props) {
+export default function SignUp() {
+  const router = useRouter();
   const [formData, setFormData] = useState<RegisterRequest>({
     username: "",
     email: "",
@@ -33,7 +35,7 @@ export default function SignUp({ navigation }: Props) {
 
   const handleRegister = async () => {
     const { username, email, password, display_name } = formData;
-    
+
     if (!username || !email || !password || !display_name) {
       Alert.alert("Error", "Required fields are missing.");
       return;
@@ -42,63 +44,69 @@ export default function SignUp({ navigation }: Props) {
     try {
       await api.post("/api/auth/register/", formData);
       Alert.alert("Success", "Account created!", [
-        { text: "Log In", onPress: () => navigation.navigate("SignIn") }
+        { text: "Log In", onPress: () => router.replace("/signin") },
       ]);
     } catch (err: any) {
-      Alert.alert("Error", err.response?.data?.detail || "Registration failed");
+      Alert.alert(
+        "Error",
+        err.response?.data?.detail || "Registration failed"
+      );
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Username*"
-        onChangeText={(text) => setFormData({ ...formData, username: text })}
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email*"
-        keyboardType="email-address"
-        onChangeText={(text) => setFormData({ ...formData, email: text })}
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Display Name*"
-        onChangeText={(text) => setFormData({ ...formData, display_name: text })}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password*"
-        secureTextEntry
-        onChangeText={(text) => setFormData({ ...formData, password: text })}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Country"
-        onChangeText={(text) => setFormData({ ...formData, country_of_origin: text })}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="City"
-        onChangeText={(text) => setFormData({ ...formData, current_city: text })}
-      />
-      <Button title="Register" onPress={handleRegister} color="#4CAF50" />
-    </ScrollView>
+    <SafeAreaView className="flex-1 bg-neutral-100">
+      <ScrollView contentContainerStyle={{ padding: 20 }}>
+        <Text className="mb-6 text-2xl font-bold text-neutral-800">
+          Create account
+        </Text>
+
+        <TextInput
+          className="mb-4 h-12 rounded-lg border border-neutral-300 bg-white px-3"
+          placeholder="Username*"
+          onChangeText={(t) => setFormData({ ...formData, username: t })}
+          autoCapitalize="none"
+        />
+        <TextInput
+          className="mb-4 h-12 rounded-lg border border-neutral-300 bg-white px-3"
+          placeholder="Email*"
+          keyboardType="email-address"
+          onChangeText={(t) => setFormData({ ...formData, email: t })}
+          autoCapitalize="none"
+        />
+        <TextInput
+          className="mb-4 h-12 rounded-lg border border-neutral-300 bg-white px-3"
+          placeholder="Display Name*"
+          onChangeText={(t) => setFormData({ ...formData, display_name: t })}
+        />
+        <TextInput
+          className="mb-4 h-12 rounded-lg border border-neutral-300 bg-white px-3"
+          placeholder="Password*"
+          secureTextEntry
+          onChangeText={(t) => setFormData({ ...formData, password: t })}
+        />
+        <TextInput
+          className="mb-4 h-12 rounded-lg border border-neutral-300 bg-white px-3"
+          placeholder="Country"
+          onChangeText={(t) =>
+            setFormData({ ...formData, country_of_origin: t })
+          }
+        />
+        <TextInput
+          className="mb-6 h-12 rounded-lg border border-neutral-300 bg-white px-3"
+          placeholder="City"
+          onChangeText={(t) => setFormData({ ...formData, current_city: t })}
+        />
+
+        <Pressable
+          className="rounded-lg bg-green-600 py-3 active:opacity-80"
+          onPress={handleRegister}
+        >
+          <Text className="text-center text-base font-semibold text-white">
+            Register
+          </Text>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 20, paddingTop: 60 },
-  input: {
-    height: 45,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    marginBottom: 15,
-    paddingHorizontal: 10,
-    backgroundColor: "#fff",
-  },
-});
