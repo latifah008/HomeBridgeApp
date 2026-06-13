@@ -43,7 +43,7 @@ export default function WelcomeScreen() {
         <View className="gap-y-3">
           <TouchableOpacity
             className="bg-[#FF6B3D] rounded-2xl py-4 items-center"
-            onPress={() => router.push("/(auth)/register")}
+            onPress={() => router.push("/signup")}
             activeOpacity={0.85}
           >
             <Text className="text-white font-bold text-base">
@@ -53,7 +53,7 @@ export default function WelcomeScreen() {
 
           <TouchableOpacity
             className="bg-[#FFF3E6] border border-[#FFE9D6] rounded-2xl py-4 items-center"
-            onPress={() => router.push("/(auth)/login")}
+            onPress={() => router.push("/signin")}
             activeOpacity={0.85}
           >
             <Text className="text-[#FF6B3D] font-bold text-base">

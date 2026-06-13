@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Alert,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
@@ -14,6 +22,7 @@ export default function SignIn() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -21,6 +30,7 @@ export default function SignIn() {
       return;
     }
 
+    setLoading(true);
     try {
       const res = await api.post<LoginResponse>("/api/auth/login/", {
         username,
@@ -30,50 +40,94 @@ export default function SignIn() {
       await SecureStore.setItemAsync("access", res.data.access);
       await SecureStore.setItemAsync("refresh", res.data.refresh);
 
-      Alert.alert("Success", "Logged in!");
-      // router.replace("/home");
+      router.replace("/home");
     } catch (err: any) {
-      const errorMsg = err.response?.data?.detail || "Login failed";
+      console.log("LOGIN ERROR:", JSON.stringify(err?.response?.data, null, 2));
+      console.log("STATUS:", err?.response?.status);
+      const errorMsg =
+        err?.response?.data?.non_field_errors?.[0] ||
+        err?.response?.data?.detail ||
+        "Login failed. Please try again.";
       Alert.alert("Error", errorMsg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-100">
-      <View className="flex-1 justify-center px-5">
-        <Text className="mb-6 text-2xl font-bold text-neutral-800">
-          Sign in
+    <SafeAreaView className="flex-1 bg-[#FFF7EE]">
+      <View className="flex-1 px-6 pt-6">
+
+        {/* Back to Home */}
+        <TouchableOpacity
+          onPress={() => router.replace("/")}
+          className="mb-8"
+        >
+          <Text className="text-[#FF6B3D] font-semibold text-sm">← Back to Home</Text>
+        </TouchableOpacity>
+
+        {/* Header */}
+        <Text className="text-3xl font-bold text-[#0E1B2A] mb-2">
+          Welcome back 👋
+        </Text>
+        <Text className="text-sm text-[#4B5563] mb-8">
+          Sign in to reconnect with your community.
         </Text>
 
+        {/* Username */}
+        <Text className="text-sm font-semibold text-[#1F2A37] mb-1">
+          Username or Email
+        </Text>
         <TextInput
-          className="mb-4 h-12 rounded-lg border border-neutral-300 bg-white px-3"
-          placeholder="Username or Email"
+          className="mb-4 h-12 rounded-2xl border border-[#FFE9D6] bg-[#FFF3E6] px-4 text-[#0E1B2A]"
+          placeholder="e.g. jane_doe"
+          placeholderTextColor="#9CA3AF"
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
         />
+
+        {/* Password */}
+        <Text className="text-sm font-semibold text-[#1F2A37] mb-1">
+          Password
+        </Text>
         <TextInput
-          className="mb-4 h-12 rounded-lg border border-neutral-300 bg-white px-3"
-          placeholder="Password"
+          className="mb-2 h-12 rounded-2xl border border-[#FFE9D6] bg-[#FFF3E6] px-4 text-[#0E1B2A]"
+          placeholder="Your password"
+          placeholderTextColor="#9CA3AF"
           value={password}
           secureTextEntry
           onChangeText={setPassword}
         />
 
-        <Pressable
-          className="rounded-lg bg-blue-500 py-3 active:opacity-80"
-          onPress={handleLogin}
-        >
-          <Text className="text-center text-base font-semibold text-white">
-            Sign In
+        {/* Forgot Password */}
+        <Pressable className="mb-8 items-end">
+          <Text className="text-sm text-[#0FA3B1] font-medium">
+            Forgot password?
           </Text>
         </Pressable>
 
-        <Pressable className="mt-5" onPress={() => router.push("/signup")}>
-          <Text className="text-center text-neutral-500">
-            Don&apos;t have an account? Sign up
+        {/* Sign In Button */}
+        <Pressable
+          className="bg-[#FF6B3D] rounded-2xl py-4 items-center active:opacity-80"
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text className="text-white font-bold text-base">Sign In</Text>
+          )}
+        </Pressable>
+
+        {/* Sign up link */}
+        <Pressable className="mt-6" onPress={() => router.push("/signup")}>
+          <Text className="text-center text-[#4B5563] text-sm">
+            Don't have an account?{" "}
+            <Text className="text-[#FF6B3D] font-bold">Sign Up</Text>
           </Text>
         </Pressable>
+
       </View>
     </SafeAreaView>
   );
